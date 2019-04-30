@@ -1,7 +1,7 @@
 <?php
 
 namespace CodingLiki\Db;
-use CodingLiki\PhpMvc\Configs\Config;
+use CodingLiki\Configs\Config;
 class DbFactory{
     private static $db_objects = [];
     private static $known_db_classes = [
