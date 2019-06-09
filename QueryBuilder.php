@@ -171,7 +171,11 @@ class QueryBuilder{
                         $or_and = $rule[1];
                         $rule = $rule[0];
                     }
-                    $query .= " $field ".$rule.' {{'.$field.'}} '.$or_and;
+                    if($rule == "= ANY" || $rule == "IN"){
+                        $query .= " $field ".$rule.' ({{'.$field.'}})'.$or_and;
+                    } else{
+                        $query .= " $field ".$rule.' {{'.$field.'}} '.$or_and;
+                    }
                 }
                 
                 $query = trim($query, 'AND');

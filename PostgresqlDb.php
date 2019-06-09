@@ -25,6 +25,9 @@ class PostgresqlDb extends Db{
                 $query = str_replace('{{'.$key.'}}', '$'.$val_num, $query);
                 $val_num++;
                 if(is_array($value) && count($value) > 1){
+                    if (is_array($value[1])) {
+                        $value[1] = '{'.implode(",",$value[1]).'}';
+                    }
                     $new_values[] = $value[1];
                 } else if(is_array($value)){
                     $new_values[] = $value[0];
