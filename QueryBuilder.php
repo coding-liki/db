@@ -3,8 +3,11 @@ namespace CodingLiki\Db;
 
 class QueryBuilder{
     protected $query = "";
+    public $last_query = "";
     protected $type = "";
     protected $where_fields = [];
+    public    $where_values = [];
+    public    $additional_values = [];
     protected $where_rules = [];
     protected $limit = 0;
     protected $order_by = [];
@@ -70,6 +73,7 @@ class QueryBuilder{
     public function addWhere($fields){
         // print_r($fields);
         $this->where_fields = $this->where_fields + array_keys($fields);
+        $this->where_values = $this->where_values + $fields;
         foreach($fields as $key => $field){
             if(is_array($field) && count($field) > 1){
                 $this->where_rules[$key] = $field[0];
@@ -160,18 +164,27 @@ class QueryBuilder{
         }// } else if($this->type == "count"){
         //     $query = $this->getCountQuery();
         // }
-
         if($add_where_order_limit){
             if (count($this->where_fields) > 0) {
                 $query .= " WHERE ";
                 foreach ($this->where_fields as $field) {
-                    $rule = $this->where_rules[$field];
+                    $rule = trim(strtoupper($this->where_rules[$field]));
+                    
+                    if($this->where_values[$field] instanceof QueryBuilder){
+                        $this->additional_values = $this->additional_values + $this->where_values[$field]->where_values + $this->where_values[$field]->additional_values;
+                        $this->additional_values[$field] = $this->where_values[$field]->last_query;
+                        $this->where_values[$field] = $this->where_values[$field]->last_query;
+                    } else if( is_array($this->where_values[$field]) && $this->where_values[$field][1] instanceof QueryBuilder){
+                        $this->additional_values = $this->additional_values + $this->where_values[$field][1]->where_values + $this->where_values[$field][1]->additional_values;
+                        $this->additional_values[$field] = $this->where_values[$field][1]->last_query;
+                        $this->where_values[$field][1] = $this->where_values[$field][1]->last_query;
+                    }
                     $or_and = "AND";
                     if(is_array($rule)){
                         $or_and = $rule[1];
                         $rule = $rule[0];
                     }
-                    if($rule == "= ANY" || $rule == "IN"){
+                    if($rule == "= ANY" || $rule == "IN" || $rule == "NOT IN"){
                         $query .= " $field ".$rule.' ({{'.$field.'}})'.$or_and;
                     } else{
                         $query .= " $field ".$rule.' {{'.$field.'}} '.$or_and;
@@ -197,9 +210,8 @@ class QueryBuilder{
         if($refresh){
             $this->refreshBuilder();
         }
-
-        // echo "<br/>$query<br/>";
-        return $query;
+        $this->last_query = $query;
+        return $this;
     }
 
     public function refreshBuilder(){

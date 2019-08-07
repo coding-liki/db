@@ -16,12 +16,27 @@ class PostgresqlDb extends Db{
         $new_values = [];
         
         $val_num = 1;
-        foreach ($values as $key => $value) {
+        $values_keys = array_keys($values);
+        for($i = 0; $i < count($values); $i++){
             # code...
+            
+            $key = $values_keys[$i];
+            $value = $values[$key];
             $has_key = strpos($query, '{{'.$key.'}}');
             if($has_key === FALSE){
                 continue;
             } else {
+                $check_sub_query = is_string($value) && strpos($value, "{{") !== false && strpos($value, "}}") !== false;
+                $check_sub_query = $check_sub_query || (is_array($value) && count($value) > 1 && strpos($value[1], "{{") !== false && strpos($value[1], "}}") !== false);
+                
+                if($check_sub_query){
+                    if(is_array($value) && count($value) > 1){
+                        $value = $value[1];
+                    }
+                    $query = str_replace('{{'.$key.'}}', $value, $query);
+                    $i = -1;
+                    continue;
+                }
                 $query = str_replace('{{'.$key.'}}', '$'.$val_num, $query);
                 $val_num++;
                 if(is_array($value) && count($value) > 1){
@@ -38,6 +53,7 @@ class PostgresqlDb extends Db{
         }
 
         return [$query, $new_values];
+        
     }
     public function getLastInsertId($table, $index){
         $query = "SELECT currval('$table"."_".$index."_seq') AS lastinsertid";
@@ -45,12 +61,9 @@ class PostgresqlDb extends Db{
         return $result['lastinsertid'];
     }
     protected function query($query, $values=[]){
-        // echo "query = `$query`";
-        // print_r($values);
         $result = pg_query_params($this->db_object, $query, $values);
         
         $result_array = pg_fetch_all($result);
-        // print_r($result_array);
         return $result_array;
     }
 }
