@@ -1,4 +1,11 @@
 {
-    "vendor": "CodingLiki",
-    "version": "0.1"
+    "name":"Db",
+    "vendor":"CodingLiki",
+    "description":"ORM Классы для работы с различными базами данных",
+    "version":"0.1",
+    "repo_url":"https://github.com/coding-liki/db.git",
+    "depends_on":[
+        "CodingLiki/Autoloader",
+        "CodingLiki/Configs"
+    ]
 }

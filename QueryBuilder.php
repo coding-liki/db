@@ -196,7 +196,7 @@ class QueryBuilder{
             }
 
             if (count($this->order_by) > 0) {
-                $query .= "ORDER BY ";
+                $query .= " ORDER BY ";
                 foreach ($this->order_by as $key => $order) {
                     $query .= "$key $order,";
                 }
@@ -206,7 +206,7 @@ class QueryBuilder{
                 $query .= " LIMIT $this->limit";
             }
         }
-
+        // echo "~$query~";
         if($refresh){
             $this->refreshBuilder();
         }
