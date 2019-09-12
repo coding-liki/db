@@ -45,8 +45,14 @@ class PostgresqlDb extends Db{
                     }
                     $new_values[] = $value[1];
                 } else if(is_array($value)){
+                    if($value[0] === false || $value[0] === true){
+                        $value[0] = $value[0] ? 1 : 0; 
+                    }
                     $new_values[] = $value[0];
                 } else {
+                    if($value === false || $value === true){
+                        $value = $value ? 1 : 0; 
+                    }
                     $new_values[] = $value;
                 }
             }
